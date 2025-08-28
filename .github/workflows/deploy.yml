@@ -1,15 +1,20 @@
 name: Deploy Vite site to GitHub Pages
-on: { push: { branches: [ 'main' ] }, workflow_dispatch: {} }
+on:
+  push: { branches: [ "main" ] }
+  workflow_dispatch: {}
 permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'npm' }
-      - run: npm ci || npm install
-      - run: npm run build
+      - run: npm ci || npm install --no-audit --no-fund
+      - run: npx --yes browserslist@latest --update-db || true
+      - run: npm run build -- --logLevel info
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
   deploy:
